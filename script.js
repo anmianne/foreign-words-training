@@ -98,7 +98,7 @@ btnExam.addEventListener('click', function () {
 function startExamMode() {
     examCardsContainer.innerHTML = '';
 
-    let cards = [];
+    const cards = [];
 
     words.forEach(word => {
         const wordCard = document.createElement('div');
@@ -139,7 +139,7 @@ function showResults() {
     clearInterval(timerId);
     resultsModalContainer.classList.remove('hidden');
 
-    let finalTime = timer.textContent;
+    const finalTime = timer.textContent;
     StatsTimer.textContent = finalTime;
 
     resultsContentContainer.innerHTML = '';
@@ -156,22 +156,25 @@ function showResults() {
     });
 }
 
+function makeWordPairs(array) {
+    const wordPairs = {};
 
-const wordPairs = {
-    "scarce": "недостаточный, скудный",
-    "недостаточный, скудный": "scarce",
-    "ambiguous": "двусмысленный",
-    "двусмысленный": "ambiguous",
-    "concise": "краткий, лаконичный",
-    "краткий, лаконичный": "concise",
-    "intrusive": "навязчивый, назойливый",
-    "навязчивый, назойливый": "intrusive",
-    "subconscious": "подсознательный",
-    "подсознательный": "subconscious"
-};
+    array.forEach(({ word, translation }) => {
+        wordPairs[word] = translation;
+        wordPairs[translation] = word;
+    });
+
+    return wordPairs;
+}
+
+const wordPairs = makeWordPairs(words);
 
 examCardsContainer.addEventListener('click', function (event) {
     const clickedCard = event.target;
+
+    if (!clickedCard.classList.contains('card') || clickedCard.classList.contains('fade-out')) {
+        return;
+    }
 
     if (selectedCards.length < 2 && !selectedCards.includes(clickedCard)) {
         clickedCard.classList.add('correct');
@@ -192,14 +195,14 @@ examCardsContainer.addEventListener('click', function (event) {
 });
 
 function checkMatch() {
-    const [card1, card2] = selectedCards;
+    const [firstCard, secondCard] = selectedCards;
 
-    const isMatch = wordPairs[card1.textContent] === card2.textContent; 
+    const isMatch = wordPairs[firstCard.textContent] === secondCard.textContent;
 
     if (isMatch) {
         setTimeout(() => {
-            card1.classList.add('fade-out');
-            card2.classList.add('fade-out');
+            firstCard.classList.add('fade-out');
+            secondCard.classList.add('fade-out');
 
             let currentPercent = parseInt(correctPercent.textContent);
             currentPercent += 20;
@@ -214,9 +217,9 @@ function checkMatch() {
             resetSelection();
         }, 500);
     } else {
-        card2.classList.add('wrong');
+        secondCard.classList.add('wrong');
         setTimeout(() => {
-            card2.classList.remove('wrong');
+            secondCard.classList.remove('wrong');
             resetSelection();
         }, 1000);
     }
